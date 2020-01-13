@@ -393,7 +393,7 @@ uint8_t lights::alpha(uint8_t val) {
 //gets color, needs testing
 uint8_t * lights::getColor(uint8_t position) {
     double mult=(double)amult/255;
-
+    
 
     int r =(Adafruit_NeoPixel::getPixelColor(position) >> 16);
     int g =(Adafruit_NeoPixel::getPixelColor(position) >> 8);

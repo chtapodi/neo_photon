@@ -31,9 +31,9 @@
 #define PIXEL_TYPE WS2812
 
 
-#define PIXEL_COUNT 60
+#define PIXEL_COUNT 300
 
-#define USE_POT 0
+#define USE_POT 1
 
 #define USE_TEMP_SENS 0
 #define TEMP_PIN A0
@@ -60,7 +60,7 @@ uint8_t potPrev= 255*(analogRead(potPin)/4095.0);
 lights lightstrip = lights(PIXEL_COUNT, PIXEL_PIN, PIXEL_TYPE);
 
 void getAndSetColor(std::string);
-
+void setRGBFromString(std::string s);
 
 
 void setup() {
@@ -186,8 +186,12 @@ void process ( const char *data) {
     else if (strcmp(data,"spectrum")==0) {
 	   select=4;
     }
-    else if (strcmp(data,"lightsOff")==0 || strcmp(data,"night")==0) {
-	 select=5;
+    else if (strcmp(data,"off")==0 || strcmp(data,"night")==0) {
+	   r=0;
+	   g=0;
+	   b=0;
+
+	 select=0;
     }
 
     else if (strcmp(data,"boostio")==0) {
@@ -207,29 +211,29 @@ void process ( const char *data) {
 
     }
     else if (s.find("rgb") !=std::string::npos) {
-	   getAndSetColor(s);
+	   if (s.find(":") !=std::string::npos) {
+		  getAndSetColor(s);
+	   }
 	   select=0;
 
     }
-    else if (s.find("glim") !=std::string::npos) {
-	   getAndSetColor(s);
+    else if (s.find("glimmer") !=std::string::npos) {
+	   if (s.find(":") !=std::string::npos) {
+		  getAndSetColor(s);
+	   }
 	   select=7;
     }
     else if (s.find("twinkle") !=std::string::npos) {
-	   getAndSetColor(s);
+	   if (s.find(":") !=std::string::npos) {
+		  getAndSetColor(s);
+	   }
 	   select=8;
     }
 
     else {
-    //
-	   uint8_t * colorArr = colors::getRGB(s);
-	   if(colorArr!=NULL) {
-		  r=colorArr[0];
-		  g=colorArr[1];
-		  b=colorArr[2];
-		  String data="";
-		  select=0;
-	   }
+    //tries to
+	   setRGBFromString(s);
+	   select=0;
 
     }
 
@@ -255,7 +259,7 @@ void control() {
 
 	   case 4: lightstrip.spectrum();
 		  break;
-	   case 5: lightstrip.off();
+	   case 5: lightstrip.off(); //depricated
 		  break;
 	   case 6: lightstrip.boostio();
 		  break;
@@ -267,26 +271,50 @@ void control() {
 
 }
 
-//gets rgb values from string and sets them
-void getAndSetColor(std::string s) {
-    static uint8_t arr[3];
-    std::string delimiter = ",";
-    size_t pos = 0;
-    std::string token;
 
-    s.erase(0, s.find(":") + delimiter.length());
-    pos = s.find(delimiter);
-    token = s.substr(0, pos);
-    r = std::atoi (token.c_str());
-
-    s.erase(0, pos + delimiter.length());
-    pos = s.find(delimiter);
-    token = s.substr(0, pos);
-    g = std::atoi (token.c_str());
-
-    s.erase(0, pos + delimiter.length());
-    b = std::atoi (s.c_str());
-
+//Takes in a string such as "orange", "green" etc and sets the RGB values to that
+void setRGBFromString(std::string s) {
+    uint8_t * colorArr = colors::getRGB(s);
+	   if(colorArr!=NULL) {
+		  r=colorArr[0];
+		  g=colorArr[1];
+		  b=colorArr[2];
+		  String data="";
+	   }
 }
 
-//TODO: Setup setcolor so its a seperate function that operates on a pixel by pixel level, and then integrate into other functions to make them less harsh
+//gets rgb values from string and sets them
+void getAndSetColor(std::string s) {
+    //removes non color information
+    s.erase(0, s.find(":") + 1);
+
+
+    //if its an rgb value
+    if (s.find(",") !=std::string::npos) {
+	   std::string delimiter = ",";
+	   size_t pos = 0;
+	   std::string token;
+
+	   
+	   pos = s.find(delimiter);
+	   token = s.substr(0, pos);
+	   r = std::atoi (token.c_str());
+
+	   s.erase(0, pos + delimiter.length());
+	   pos = s.find(delimiter);
+	   token = s.substr(0, pos);
+	   g = std::atoi (token.c_str());
+
+	   s.erase(0, pos + delimiter.length());
+	   b = std::atoi (s.c_str());
+    }
+    else {
+	   //Removes all white space characters
+	   s.erase(std::remove_if(s.begin(), s.end(), ::isspace), s.end());
+	   setRGBFromString(s);
+    }
+
+
+
+
+}

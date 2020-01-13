@@ -1,6 +1,6 @@
 #include "colors.h"
 
-uint8_t codeArr[10][3] = {
+uint8_t codeArr[11][3] = {
     {255,255,255}, //white
     {255,0,0}, //red
     {0,0,255}, //blue
@@ -10,12 +10,13 @@ uint8_t codeArr[10][3] = {
     {255,0,50}, //pink
     {255,30,0}, //orange
     {128,0,128}, //purple
-    {0,255,20}
-    
+    {0,255,20}, //light green
+    {255,70,50}
+
 };
 
 
-std::string colorArr[10]= {
+std::string colorArr[11]= {
     "white",
     "red",
     "blue",
@@ -25,39 +26,40 @@ std::string colorArr[10]= {
     "pink",
     "orange",
     "purple",
-    "light green"
+    "light green",
+    "sun"
 };
 
 
 //These are different ways to display
- 
+
 
 uint8_t * colors::getRGB(std::string color) {
     int loc =getLoc(color);
-    
+
     if(loc==-1) {
-        return NULL;
+	   return NULL;
     }
     else {
-        
-        
-        return codeArr[loc];
+
+
+	   return codeArr[loc];
     }
-    
-    
+
+
 }
 
 
 
 int8_t colors::getLoc(std::string color) {
-    
-    
-    for (int i=0; i < 10; i = i + 1 ) {
-        
-        if ( color.compare(colorArr[i])==0 ) {
-            
-            return i;
-        }
+
+
+    for (int i=0; i < 11; i = i + 1 ) {
+
+	   if ( color.compare(colorArr[i])==0 ) {
+
+		  return i;
+	   }
     }
     return -1;
 }
